@@ -25,12 +25,30 @@ import (
 )
 
 // NewClientSet returns a new Kubernetes clientset
-func NewClientSet(kubeContext, kubeConfig string) (*kubernetes.Clientset, error) {
+func NewClientSet(kubeContext, kubeConfig string, impersonateUser string, impersonateGroup string) (*kubernetes.Clientset, error) {
 	config, err := getKubeConfig(kubeContext, kubeConfig)
 	if err != nil {
 		return nil, err
 	}
-
+	groupArray := []string {impersonateGroup}
+	// --as and --as-group
+	if impersonateUser != "" && impersonateGroup != "" {
+		config.Impersonate = rest.ImpersonationConfig {
+        	UserName: impersonateUser,
+			Groups: groupArray,
+		}
+	// --as
+	} else if impersonateUser != "" && impersonateGroup == "" {
+		config.Impersonate = rest.ImpersonationConfig {
+			UserName: impersonateUser,
+		}
+	// --as-group
+	} else if impersonateUser == "" && impersonateGroup != "" {
+		config.Impersonate = rest.ImpersonationConfig {
+			Groups: groupArray,
+		}
+	}
+	
 	return kubernetes.NewForConfig(config)
 }
 
