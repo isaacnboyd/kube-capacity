@@ -19,6 +19,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
+	"fmt"
 
 	// Required for GKE, OIDC, and more
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -35,6 +36,7 @@ func NewClientSet(kubeContext, kubeConfig string, impersonateUser string, impers
 	// --as-group
 	// --as and --as-group
 	if impersonateUser != "" {
+		fmt.Println("\n\n\nDEBUG!!\n\n\n")
 		config.Impersonate = rest.ImpersonationConfig {
         	UserName: impersonateUser,
 		}
