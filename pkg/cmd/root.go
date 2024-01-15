@@ -36,6 +36,8 @@ var kubeConfig string
 var outputFormat string
 var sortBy string
 var availableFormat bool
+var impersonateUser string
+var impersonateGroup string
 
 var rootCmd = &cobra.Command{
 	Use:   "kube-capacity",
@@ -84,10 +86,13 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&sortBy,
 		"sort", "", "name",
 		fmt.Sprintf("attribute to sort results by (supports: %v)", capacity.SupportedSortAttributes))
-
 	rootCmd.PersistentFlags().StringVarP(&outputFormat,
 		"output", "o", capacity.TableOutput,
 		fmt.Sprintf("output format for information (supports: %v)", capacity.SupportedOutputs()))
+	rootCmd.PersistentFlags().StringVarP(&impersonateUser,
+		"impersonate-user", "", "", "user to impersonate command with")
+	rootCmd.PersistentFlags().StringVarP(&impersonateUser,
+		"impersonate-group", "", "", "group to impersonate command with")
 }
 
 // Execute is the primary entrypoint for this CLI
