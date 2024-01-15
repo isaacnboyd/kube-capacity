@@ -31,16 +31,30 @@ func NewClientSet(kubeContext, kubeConfig string, impersonateUser string, impers
 	if err != nil {
 		return nil, err
 	}
-	// Need to have 3 cases for
-	// --as
-	// --as-group
+	groupArray := []string {impersonateGroup}
 	// --as and --as-group
-	if impersonateUser != "" {
-		fmt.Println("\n\n\nDEBUG!!\n\n\n")
+	if impersonateUser != "" && impersonateGroup != "" {
+		fmt.Println("\n\n\nimpersonate user and group\n\nuser: " + impersonateUser + "\ngroup: " + impersonateGroup + "\n\n")
 		config.Impersonate = rest.ImpersonationConfig {
         	UserName: impersonateUser,
+			Groups: groupArray,
 		}
+	// --as
+	} else if impersonateUser != "" && impersonateGroup == "" {
+		fmt.Println("\n\n\nimpersonate user\n\nuser: " + impersonateUser + "\ngroup: " + impersonateGroup + "\n\n")
+		config.Impersonate = rest.ImpersonationConfig {
+			UserName: impersonateUser,
+		}
+	// --as-group
+	} else if impersonateUser == "" && impersonateGroup != "" {
+		fmt.Println("\n\n\nimpersonate group\n\nuser: " + impersonateUser + "\ngroup: " + impersonateGroup + "\n\n")
+		config.Impersonate = rest.ImpersonationConfig {
+			Groups: groupArray,
+		}
+	} else {
+		fmt.Println("\n\n\nno impersonation\n\n\n")
 	}
+	
 	return kubernetes.NewForConfig(config)
 }
 

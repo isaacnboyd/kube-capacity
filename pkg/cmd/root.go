@@ -91,7 +91,7 @@ func init() {
 		fmt.Sprintf("output format for information (supports: %v)", capacity.SupportedOutputs()))
 	rootCmd.PersistentFlags().StringVarP(&impersonateUser,
 		"as", "", "", "user to impersonate command with")
-	rootCmd.PersistentFlags().StringVarP(&impersonateUser,
+	rootCmd.PersistentFlags().StringVarP(&impersonateGroup,
 		"as-group", "", "", "group to impersonate command with")
 }
 
