@@ -82,6 +82,8 @@ func splitTaint(taint string) (string, string, string) {
 		value = ""
 		return key, value, effect
 	}
+
+	return "", "", ""
 }
 
 // This loops through the original nodeList from getPodsAndNodes and checks each node individually for the list of taints. If a node contains any taint in the list, it is removedfrom nodeList, otherwise it is remains.
