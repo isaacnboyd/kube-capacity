@@ -131,7 +131,7 @@ kube-capacity --namespace-labels team=api
 kube-capacity --node-labels kubernetes.io/role=node
 ```
 
-### Filtering By Taints
+### Filtering By Node Taints
 Kube-capacity supports advanced filtering by taints. Users can filter in and filter out taints within the same expression. The following examples show how to use node taint filters:
 
 ```
