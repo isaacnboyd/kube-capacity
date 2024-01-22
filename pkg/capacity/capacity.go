@@ -362,7 +362,8 @@ func FetchAndPrint(showContainers, showPods, showUtil, showPodCount, excludeTain
 	printList(&cm, showContainers, showPods, showUtil, showPodCount, showNamespace, output, sortBy, availableFormat)
 }
 
-// Taints can have two possible formats, key1:effect or key1=value1:effect. This function handles both formats and returns each part as a separate string for comparison.
+// splitTaint handles two possible taint formats, key1:effect and key1=value1:effect.
+// Returns key, value, and effect as strings.
 func splitTaint(taint string) (string, string, string) {
 	var key, value, effect string
 	var parts []string
@@ -388,7 +389,9 @@ func splitTaint(taint string) (string, string, string) {
 
 }
 
-// This loops through the original nodeList from getPodsAndNodes and checks each node individually for the list of taints. If a node contains any taint in the list, it is removedfrom nodeList, otherwise it is remains.
+// removeNodesWithTaints loops through the original nodeList from getPodsAndNodes
+// and checks each node individually for the list of taints. If a node contains
+// any taint in the list, it is removed from nodeList
 func removeNodesWithTaints(nodeList corev1.NodeList, taints []string) corev1.NodeList {
 	var tempNodeList corev1.NodeList
 	var key, value, effect string
@@ -416,7 +419,9 @@ func removeNodesWithTaints(nodeList corev1.NodeList, taints []string) corev1.Nod
 	return tempNodeList
 }
 
-// This loops through the original nodeList from getPodsAndNodes and checks each node individually for the list of taints. If a node contains any taint in the list, it remains as part of nodeList, otherwise it is removed.
+// addNodesWithTaints loops through the original nodeList from getPodsAndNodes and
+// checks each node individually for the list of taints. If a node contains any
+// taint in the list, it remains as part of nodeList, otherwise it is removed.
 func addNodesWithTaints(nodeList corev1.NodeList, taints []string) corev1.NodeList {
 	var tempNodeList corev1.NodeList
 	var key, value, effect string
@@ -444,7 +449,8 @@ func addNodesWithTaints(nodeList corev1.NodeList, taints []string) corev1.NodeLi
 	return tempNodeList
 }
 
-// The initial list of taints is supplied as a comma delimited string. Taints that need to be excluded are prefixed with an !, otherwise they are included.
+// splitTaintsByAddRemove parses a string of taints and organizes them
+// into lists of taints that should be filtered in and filtered out
 func splitTaintsByAddRemove(taints string) (taintsToAdd []string, taintsToRemove []string) {
 	taintSlice := strings.Split(taints, ",")
 	for _, taint := range taintSlice {
@@ -476,7 +482,6 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 		nodeList.Items = filteredNodeList
 	}
 
-	// It is not possible to filter nodeList based on taints, so if we want to filter based on taints, we need to check each node individually and check it's taints.
 	if nodeTaints != "" {
 		taintedNodes := *nodeList
 		taintsToAdd, taintsToRemove := splitTaintsByAddRemove(nodeTaints)
