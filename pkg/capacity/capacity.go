@@ -118,6 +118,8 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 				if onlyRemove || addAndRemove {
 					for _, paramTaint := range taintsToRemove {
 						if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
+							print("debug " + node.ObjectMeta.Name + " ")
+							fmt.Sprintf("%t", nodeIsTainted)
 							if addAndRemove && nodeIsTainted == true {
 								tempNodeList.Items = tempNodeList.Items[:len(tempNodeList.Items)-1]
 								println("Remove node " + node.ObjectMeta.Name + " 123")
