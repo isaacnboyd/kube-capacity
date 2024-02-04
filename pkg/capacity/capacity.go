@@ -129,7 +129,7 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 					}
 				}
 			}
-			if dontAddNode == false {
+			if onlyRemove == true && dontAddNode == false {
 				println("Added node " + node.ObjectMeta.Name + " 133")
 				tempNodeList.Items = append(tempNodeList.Items, node)
 			}
