@@ -90,12 +90,15 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 		onlyRemove := false
 		addAndRemove := false
 		if len(taintsToAdd) > 0 && len(taintsToRemove) == 0 {
+			println("onlyAdd 93")
 			onlyAdd = true
 		}
 		if len(taintsToAdd) == 0 && len(taintsToRemove) > 0 {
+			println("onlyRemove 97")
 			onlyRemove = true
 		}
 		if len(taintsToAdd) > 0 && len(taintsToRemove) > 0 {
+			println("addAndRemove 101")
 			addAndRemove = true
 		}
 		nodeIsTainted := false
@@ -108,6 +111,7 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 						if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
 							nodeIsTainted = true
 							tempNodeList.Items = append(tempNodeList.Items, node)
+							println("Added node " + node.ObjectMeta.Name + " 114")
 						}
 					}
 				}
@@ -115,8 +119,8 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 					for _, paramTaint := range taintsToRemove {
 						if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
 							if addAndRemove && nodeIsTainted == true {
-								// remove item from array - 1
 								tempNodeList.Items = tempNodeList.Items[:len(tempNodeList.Items)-1]
+								println("Remove node " + node.ObjectMeta.Name + " 123")
 							}
 							if onlyRemove {
 								dontAddNode = true
@@ -126,6 +130,7 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 				}
 			}
 			if dontAddNode == false {
+				println("Added node " + node.ObjectMeta.Name + " 133")
 				tempNodeList.Items = append(tempNodeList.Items, node)
 			}
 			dontAddNode = false
