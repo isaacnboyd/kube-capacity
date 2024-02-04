@@ -86,56 +86,52 @@ func getPodsAndNodes(clientset kubernetes.Interface, excludeTainted bool, podLab
 			os.Exit(3)
 		}
 
-		var tempAddNodeList corev1.NodeList
-		var tempRemoveNodeList corev1.NodeList
+		onlyAdd := false
+		onlyRemove := false
+		addAndRemove := false
+		if len(taintsToAdd) > 0 && len(taintsToRemove) == 0 {
+			onlyAdd = true
+		}
+		if len(taintsToAdd) == 0 && len(taintsToRemove) > 0 {
+			onlyRemove = true
+		}
+		if len(taintsToAdd) > 0 && len(taintsToRemove) > 0 {
+			addAndRemove = true
+		}
+		nodeIsTainted := false
+		dontAddNode := false
+		var tempNodeList corev1.NodeList
 		for _, node := range nodeList.Items {
 			for _, nodeTaint := range node.Spec.Taints {
-				for _, paramTaint := range taintsToAdd {
-					if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
-						tempAddNodeList.Items = append(tempAddNodeList.Items, node)
+				if onlyAdd || addAndRemove {
+					for _, paramTaint := range taintsToAdd {
+						if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
+							nodeIsTainted = true
+							tempNodeList.Items = append(tempNodeList.Items, node)
+						}
 					}
 				}
-				for _, paramTaint := range taintsToRemove {
-					if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
-						tempRemoveNodeList.Items = append(tempRemoveNodeList.Items, node)
+				if onlyRemove || addAndRemove {
+					for _, paramTaint := range taintsToRemove {
+						if nodeTaint.Key == paramTaint.Key && nodeTaint.Effect == paramTaint.Effect {
+							if addAndRemove && nodeIsTainted == true {
+								// remove item from array - 1
+								tempNodeList.Items = tempNodeList.Items[:len(tempNodeList.Items)-1]
+							}
+							if onlyRemove {
+								dontAddNode = true
+							}
+						}
 					}
 				}
 			}
+			if dontAddNode == false {
+				tempNodeList.Items = append(tempNodeList.Items, node)
+			}
+			dontAddNode = false
+			nodeIsTainted = false
 		}
-
-		isTainted := false
-		var tempFinalNodeList corev1.NodeList
-		if len(tempRemoveNodeList.Items) == 0 {
-			*nodeList = tempAddNodeList
-		} else if len(tempAddNodeList.Items) == 0 {
-			for _, node := range nodeList.Items {
-				for _, removedNode := range tempRemoveNodeList.Items {
-					if node.ObjectMeta.Name == removedNode.ObjectMeta.Name {
-						isTainted = true
-						break
-					}
-				}
-				if !isTainted {
-					tempFinalNodeList.Items = append(tempFinalNodeList.Items, node)
-				}
-				isTainted = false
-			}
-			*nodeList = tempFinalNodeList
-		} else {
-			for _, node := range tempAddNodeList.Items {
-				for _, removedNode := range tempRemoveNodeList.Items {
-					if node.ObjectMeta.Name == removedNode.ObjectMeta.Name {
-						isTainted = true
-						break
-					}
-				}
-				if !isTainted {
-					tempFinalNodeList.Items = append(tempFinalNodeList.Items, node)
-				}
-				isTainted = false
-			}
-			*nodeList = tempFinalNodeList
-		}
+		*nodeList = tempNodeList
 	}
 
 	podList, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{
